@@ -4,7 +4,7 @@ import { useAnalysisStore } from "../../store/useAnalysisStore";
 import { useNavigate } from "react-router-dom";
 
 const Analysis = () => {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
   const { uploadedImage, analysisResult } = useAnalysisStore();
 
   useEffect(() => {
@@ -22,7 +22,7 @@ const Analysis = () => {
       <div className="container mx-auto px-4 py-8">
         <div className="mb-8">
           <button
-            onClick={() => navigate('/dashboard')}
+            onClick={() => navigate("/")}
             className="flex items-center text-purple-600 hover:text-purple-800 transition-colors duration-200"
           >
             <ArrowLeft className="w-5 h-5 mr-2" />

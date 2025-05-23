@@ -8,26 +8,28 @@ import {
   Users,
   Baby,
 } from "lucide-react";
-import { useState } from "react";
+import { Link } from "react-router";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 
-export interface UserData {
-  email: string;
-  password: string;
-  age: string;
-  gender: string;
-  pregnancy: string;
-  skinType: string;
-}
+const signupSchema = z.object({
+  email: z.string().email("Invalid email"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
+  age: z.string().min(1, "Age is required"),
+  gender: z.string().min(1, "Gender is required"),
+  pregnancy: z.string(),
+  skinType: z.string().min(1, "Skin type is required"),
+});
+
+type SignupData = z.infer<typeof signupSchema>;
 
 const Signup = () => {
-  const [userData, setUserData] = useState<UserData>({
-    email: "",
-    password: "",
-    age: "",
-    gender: "",
-    pregnancy: "no",
-    skinType: "",
-  });
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<SignupData>({ resolver: zodResolver(signupSchema) });
 
   const skinTypes = [
     "Normal",
@@ -37,7 +39,11 @@ const Signup = () => {
     "Sensitive",
     "Acne-Prone",
   ];
-  const handleSignup = () => {};
+
+  const handleSignup = (data: SignupData) => {
+    console.log("Signed up with:", data);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-indigo-50 flex items-center justify-center p-4">
       <div className="bg-white/80 backdrop-blur-lg rounded-3xl shadow-2xl p-8 w-full max-w-md border border-white/20">
@@ -51,59 +57,53 @@ const Signup = () => {
           <p className="text-gray-600 mt-2">Join our community</p>
         </div>
 
-        <div className="space-y-6">
+        <form onSubmit={handleSubmit(handleSignup)} className="space-y-6">
           <div className="space-y-4">
             <div className="relative">
               <Mail className="absolute left-3 top-3 text-gray-400 w-5 h-5" />
               <input
-                type="email"
+                {...register("email")}
                 placeholder="Email address"
-                className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300"
-                value={userData.email}
-                onChange={(e) =>
-                  setUserData({ ...userData, email: e.target.value })
-                }
-                required
+                className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200"
               />
+              {errors.email && (
+                <p className="text-red-500 text-sm">{errors.email.message}</p>
+              )}
             </div>
 
             <div className="relative">
               <Lock className="absolute left-3 top-3 text-gray-400 w-5 h-5" />
               <input
                 type="password"
+                {...register("password")}
                 placeholder="Password"
-                className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300"
-                value={userData.password}
-                onChange={(e) =>
-                  setUserData({ ...userData, password: e.target.value })
-                }
-                required
+                className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200"
               />
+              {errors.password && (
+                <p className="text-red-500 text-sm">
+                  {errors.password.message}
+                </p>
+              )}
             </div>
 
             <div className="relative">
               <Calendar className="absolute left-3 top-3 text-gray-400 w-5 h-5" />
               <input
                 type="number"
+                {...register("age")}
                 placeholder="Age"
-                className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300"
-                value={userData.age}
-                onChange={(e) =>
-                  setUserData({ ...userData, age: e.target.value })
-                }
-                required
+                className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200"
               />
+              {errors.age && (
+                <p className="text-red-500 text-sm">{errors.age.message}</p>
+              )}
             </div>
 
             <div className="relative">
               <Users className="absolute left-3 top-3 text-gray-400 w-5 h-5" />
               <select
-                className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300 appearance-none bg-white"
-                value={userData.gender}
-                onChange={(e) =>
-                  setUserData({ ...userData, gender: e.target.value })
-                }
-                required
+                {...register("gender")}
+                className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 bg-white"
               >
                 <option value="">Select Gender</option>
                 <option value="female">Female</option>
@@ -111,16 +111,16 @@ const Signup = () => {
                 <option value="other">Other</option>
                 <option value="prefer-not-to-say">Prefer not to say</option>
               </select>
+              {errors.gender && (
+                <p className="text-red-500 text-sm">{errors.gender.message}</p>
+              )}
             </div>
 
             <div className="relative">
               <Baby className="absolute left-3 top-3 text-gray-400 w-5 h-5" />
               <select
-                className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300 appearance-none bg-white"
-                value={userData.pregnancy}
-                onChange={(e) =>
-                  setUserData({ ...userData, pregnancy: e.target.value })
-                }
+                {...register("pregnancy")}
+                className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 bg-white"
               >
                 <option value="no">Not Pregnant</option>
                 <option value="yes">Pregnant</option>
@@ -132,12 +132,8 @@ const Signup = () => {
             <div className="relative">
               <Droplets className="absolute left-3 top-3 text-gray-400 w-5 h-5" />
               <select
-                className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300 appearance-none bg-white"
-                value={userData.skinType}
-                onChange={(e) =>
-                  setUserData({ ...userData, skinType: e.target.value })
-                }
-                required
+                {...register("skinType")}
+                className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 bg-white"
               >
                 <option value="">Select Skin Type</option>
                 {skinTypes.map((type) => (
@@ -146,22 +142,30 @@ const Signup = () => {
                   </option>
                 ))}
               </select>
+              {errors.skinType && (
+                <p className="text-red-500 text-sm">
+                  {errors.skinType.message}
+                </p>
+              )}
             </div>
           </div>
 
           <button
-            onClick={handleSignup}
-            className="w-full bg-gradient-to-r from-pink-500 to-purple-600 text-white py-3 rounded-xl font-semibold hover:from-pink-600 hover:to-purple-700 transition-all duration-300 transform hover:scale-105 flex items-center justify-center space-x-2"
+            type="submit"
+            className="w-full bg-gradient-to-r from-pink-500 to-purple-600 text-white py-3 rounded-xl font-semibold flex items-center justify-center space-x-2"
           >
-            <span>"Create Account</span>
+            <span>Create Account</span>
             <ArrowRight className="w-5 h-5" />
           </button>
-        </div>
+        </form>
 
         <div className="mt-6 text-center">
-          <button className="text-purple-600 hover:text-purple-700 font-medium transition-colors duration-300">
+          <Link
+            to="/login"
+            className="text-purple-600 hover:text-purple-700 font-medium"
+          >
             Already have an account? Sign in
-          </button>
+          </Link>
         </div>
       </div>
     </div>

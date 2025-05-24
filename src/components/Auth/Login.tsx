@@ -3,13 +3,14 @@ import { Sparkles, Lock, Mail, ArrowRight } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router";
 import { z } from "zod";
+import useAuthStore from "../../store/useAuthStore";
 
 const loginSchema = z.object({
   email: z.string().email("Invalid email address"),
   password: z.string().min(6, "Password must be at least 6 characters"),
 });
 
-type LoginFormData = z.infer<typeof loginSchema>;
+export type LoginFormData = z.infer<typeof loginSchema>;
 
 const Login = () => {
   const navigate = useNavigate();
@@ -21,6 +22,7 @@ const Login = () => {
 
   const handleLogin = (data: LoginFormData) => {
     console.log("Logging in with:", data);
+    useAuthStore.getState().setUser(data);
     navigate("/");
   };
 

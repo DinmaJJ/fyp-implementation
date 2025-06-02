@@ -55,22 +55,7 @@ const Analysis = () => {
                   {analysisResult.acneType}
                 </p>
               </div>
-              <div>
-                <h3 className="text-xl font-semibold text-gray-800">
-                  Severity
-                </h3>
-                <p className="text-red-600 text-lg font-medium">
-                  {analysisResult.severity}
-                </p>
-              </div>
-              <div>
-                <h3 className="text-xl font-semibold text-gray-800">
-                  Confidence
-                </h3>
-                <p className="text-green-600 text-lg font-medium">
-                  {analysisResult.confidence}%
-                </p>
-              </div>
+         
             </div>
           </div>
 

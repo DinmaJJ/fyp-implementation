@@ -1,9 +1,9 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Sparkles, Lock, Mail, ArrowRight } from "lucide-react";
 import { useForm } from "react-hook-form";
-import { Link, useNavigate } from "react-router";
+import { Link } from "react-router";
 import { z } from "zod";
-import useAuthStore from "../../store/useAuthStore";
+import { useLogin } from "../../hooks/useLogin";
 
 const loginSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -13,17 +13,15 @@ const loginSchema = z.object({
 export type LoginFormData = z.infer<typeof loginSchema>;
 
 const Login = () => {
-  const navigate = useNavigate();
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm<LoginFormData>({ resolver: zodResolver(loginSchema) });
 
+  const { mutate: login } = useLogin();
   const handleLogin = (data: LoginFormData) => {
-    console.log("Logging in with:", data);
-    useAuthStore.getState().setUser(data);
-    navigate("/");
+    login(data);
   };
 
   return (

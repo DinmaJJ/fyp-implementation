@@ -12,6 +12,7 @@ import { Link } from "react-router";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useRegister } from "../../hooks/useRegister";
 
 const signupSchema = z.object({
   email: z.string().email("Invalid email"),
@@ -22,7 +23,7 @@ const signupSchema = z.object({
   skinType: z.string().min(1, "Skin type is required"),
 });
 
-type SignupData = z.infer<typeof signupSchema>;
+export type SignupData = z.infer<typeof signupSchema>;
 
 const Signup = () => {
   const {
@@ -39,9 +40,12 @@ const Signup = () => {
     "Sensitive",
     "Acne-Prone",
   ];
+  
+  const { mutate: signup } = useRegister();
 
   const handleSignup = (data: SignupData) => {
     console.log("Signed up with:", data);
+    signup(data);
   };
 
   return (

@@ -2,9 +2,7 @@ import { create } from "zustand";
 
 export type AnalysisResult = {
   acneType: string;
-  // severity: string;
   products: string[];
-  // confidence: number;
 };
 
 type Store = {

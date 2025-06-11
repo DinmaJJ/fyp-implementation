@@ -5,10 +5,16 @@ import { useNavigate } from "react-router";
 import type { LoginFormData } from "../components/Auth/Login";
 import toast from "react-hot-toast";
 
-const apiClient = new APIClient("/login");
+const apiClient = new APIClient("/auth/login");
+
+interface LoginResponse {
+  user: LoginFormData;
+  isAuthenticated: boolean;
+}
 
 export const useLogin = () => {
   const navigate = useNavigate();
+  const { setUser, setAuthenticated } = useAuthStore();
 
   const mutation = useMutation({
     mutationFn: (data: LoginFormData) => apiClient.login(data),
@@ -16,17 +22,16 @@ export const useLogin = () => {
       console.log(error);
       toast.error("An error occurred during authentication");
     },
-    onSuccess: (data) => {
-      const userData: any = data;
-      localStorage.setItem("loginMethod", userData.loginMethod);
+    onSuccess: (data: LoginResponse) => {
+      setUser(data.user);
+      setAuthenticated(data.isAuthenticated);
       toast.success("Authentication successful");
-      useAuthStore.getState().setUser(data);
       navigate("/");
     },
   });
+
   const handleLogout = () => {
     useAuthStore.getState().clearUser();
-    localStorage.removeItem("loginMethod");
     navigate("/login");
   };
 

@@ -1,66 +1,20 @@
-import { Camera, Sparkles, Upload } from "lucide-react";
+import { Camera, LogOut, Sparkles, Upload, ArrowLeft, CheckCircle } from "lucide-react";
 import { useRef, useState } from "react";
-import { useAnalysisStore } from "../../store/useAnalysisStore";
 import { useNavigate } from "react-router";
+import { useLogin } from "../../hooks/useLogin";
+import { useAnalysis } from "../../hooks/useAnalysis";
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const { uploadedImage, setUploadedImage, setAnalysisResult } =
-    useAnalysisStore();
+  const { handleLogout } = useLogin();
+  const { mutate: analyzeImage, isPending: isAnalyzing, data: analysisResult } = useAnalysis();
 
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [showCamera, setShowCamera] = useState(false);
+  const [uploadedImage, setUploadedImage] = useState<string | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-
-  const analyzeImage = () => {
-    setIsAnalyzing(true);
-    setTimeout(() => {
-      const mockResults = [
-        {
-          acneType: "Inflammatory Acne",
-          severity: "Moderate",
-          products: [
-            "Benzoyl Peroxide 2.5%",
-            "Salicylic Acid Cleanser",
-            "Niacinamide Serum",
-            "Gentle Moisturizer",
-          ],
-          confidence: 87,
-        },
-        {
-          acneType: "Comedonal Acne",
-          severity: "Mild",
-          products: [
-            "Retinol Cream",
-            "BHA Exfoliant",
-            "Gentle Cleanser",
-            "Hyaluronic Acid Moisturizer",
-          ],
-          confidence: 92,
-        },
-        {
-          acneType: "Cystic Acne",
-          severity: "Severe",
-          products: [
-            "Prescription Tretinoin",
-            "Antibacterial Cleanser",
-            "Hydrocortisone Cream",
-            "Oil-Free Moisturizer",
-          ],
-          confidence: 78,
-        },
-      ];
-
-      const randomResult =
-        mockResults[Math.floor(Math.random() * mockResults.length)];
-      setAnalysisResult(randomResult);
-      setIsAnalyzing(false);
-      navigate("/analysis");
-    }, 3000);
-  };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -68,7 +22,7 @@ const Dashboard = () => {
       const reader = new FileReader();
       reader.onload = () => {
         setUploadedImage(reader.result as string);
-        analyzeImage();
+        analyzeImage(file);
       };
       reader.readAsDataURL(file);
     }
@@ -102,25 +56,45 @@ const Dashboard = () => {
         setShowCamera(false);
         const stream = video.srcObject as MediaStream;
         stream.getTracks().forEach((track) => track.stop());
-        analyzeImage();
+        
+        // Convert base64 to File
+        fetch(imageData)
+          .then(res => res.blob())
+          .then(blob => {
+            const file = new File([blob], "captured-image.jpg", { type: "image/jpeg" });
+            analyzeImage(file);
+          });
       }
     }
+  };
+
+  const handleNewAnalysis = () => {
+    setUploadedImage(null);
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-indigo-50">
       <div className="container mx-auto px-4 py-8">
-        <div className="text-center mb-12">
-          <div className="bg-gradient-to-r from-pink-500 to-purple-600 w-20 h-20 rounded-3xl flex items-center justify-center mx-auto mb-6">
-            <Sparkles className="text-white w-10 h-10" />
+        <div className="flex justify-between items-center mb-12">
+          <div className="text-center flex-1">
+            <div className="bg-gradient-to-r from-pink-500 to-purple-600 w-20 h-20 rounded-3xl flex items-center justify-center mx-auto mb-6">
+              <Sparkles className="text-white w-10 h-10" />
+            </div>
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent mb-4">
+              Acne Analysis
+            </h1>
+            <p className="text-gray-600 text-lg max-w-2xl mx-auto">
+              Upload a photo or take a live picture to get personalized acne
+              analysis and product recommendations
+            </p>
           </div>
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent mb-4">
-            Acne Analysis
-          </h1>
-          <p className="text-gray-600 text-lg max-w-2xl mx-auto">
-            Upload a photo or take a live picture to get personalized acne
-            analysis and product recommendations
-          </p>
+          <button
+            onClick={handleLogout}
+            className="flex items-center space-x-2 bg-white/80 backdrop-blur-lg px-4 py-2 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
+          >
+            <LogOut className="w-5 h-5 text-gray-600" />
+            <span className="text-gray-600">Logout</span>
+          </button>
         </div>
 
         <div className="max-w-4xl mx-auto">
@@ -207,6 +181,58 @@ const Dashboard = () => {
               <p className="text-gray-600">
                 Our AI is examining your skin condition...
               </p>
+            </div>
+          )}
+
+          {uploadedImage && analysisResult && (
+            <div className="space-y-8">
+              <div className="flex justify-between items-center">
+                <h2 className="text-2xl font-bold text-gray-800">Analysis Results</h2>
+                <button
+                  onClick={handleNewAnalysis}
+                  className="flex items-center space-x-2 bg-white/80 backdrop-blur-lg px-4 py-2 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
+                >
+                  <ArrowLeft className="w-5 h-5 text-gray-600" />
+                  <span className="text-gray-600">New Analysis</span>
+                </button>
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-8">
+                <div className="bg-white/80 backdrop-blur-lg rounded-3xl p-8 shadow-xl border border-white/20">
+                  <img
+                    src={uploadedImage}
+                    alt="Uploaded"
+                    className="w-full rounded-2xl mb-6"
+                  />
+                  <div className="space-y-4 text-center">
+                    <div>
+                      <h3 className="text-xl font-semibold text-gray-800">
+                        Acne Types
+                      </h3>
+                      <p className="text-purple-700 text-lg font-medium">
+                        {analysisResult.acne_types.join(", ")}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-white/80 backdrop-blur-lg rounded-3xl p-8 shadow-xl border border-white/20">
+                  <h3 className="text-2xl font-semibold text-gray-800 mb-4 text-center">
+                    Recommended Products
+                  </h3>
+                  <ul className="space-y-4">
+                    {analysisResult.recommendations.map((product, index) => (
+                      <li
+                        key={index}
+                        className="flex items-center bg-white border border-gray-200 rounded-xl p-4 shadow-sm hover:shadow-md transition-all duration-200"
+                      >
+                        <CheckCircle className="text-green-500 w-5 h-5 mr-3" />
+                        <span className="text-gray-700">{product}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
             </div>
           )}
 

@@ -4,7 +4,7 @@ import APIClient from "../services/api-client";
 import type { SignupData } from "../components/Auth/Signup";
 import toast from "react-hot-toast";
 
-const apiClient = new APIClient("/signup");
+const apiClient = new APIClient("/auth/signup");
 
 export const useRegister = () => {
   const navigate = useNavigate();

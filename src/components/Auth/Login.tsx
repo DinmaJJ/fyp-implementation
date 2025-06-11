@@ -19,7 +19,7 @@ const Login = () => {
     formState: { errors },
   } = useForm<LoginFormData>({ resolver: zodResolver(loginSchema) });
 
-  const { mutate: login } = useLogin();
+  const { mutate: login, isPending } = useLogin();
   const handleLogin = (data: LoginFormData) => {
     login(data);
   };
@@ -74,20 +74,34 @@ const Login = () => {
             </div>
           </div>
 
-          <button className="w-full bg-gradient-to-r from-pink-500 to-purple-600 text-white py-3 rounded-xl font-semibold hover:from-pink-600 hover:to-purple-700 transition-all duration-300 transform hover:scale-105 flex items-center justify-center space-x-2">
-            <span>Sign In</span>
-            <ArrowRight className="w-5 h-5" />
-          </button>
-        </form>
-
-        <div className="mt-6 text-center">
-          <Link
-            to="/signup"
-            className="text-purple-600 hover:text-purple-700 font-medium transition-colors duration-300"
+          <button
+            type="submit"
+            disabled={isPending}
+            className="w-full bg-gradient-to-r from-pink-500 to-purple-600 text-white py-3 rounded-xl font-semibold hover:from-pink-600 hover:to-purple-700 transition-all duration-300 transform hover:scale-105 flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Don't have an account? Sign up
-          </Link>
-        </div>
+            {isPending ? (
+              <>
+                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                <span>Signing in...</span>
+              </>
+            ) : (
+              <>
+                <span>Sign In</span>
+                <ArrowRight className="w-5 h-5" />
+              </>
+            )}
+          </button>
+
+          <p className="text-center text-gray-600">
+            Don't have an account?{" "}
+            <Link
+              to="/signup"
+              className="text-purple-600 hover:text-purple-700 font-medium"
+            >
+              Sign Up
+            </Link>
+          </p>
+        </form>
       </div>
     </div>
   );
